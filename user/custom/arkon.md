@@ -22,7 +22,7 @@ no reset symptom:
 * use work3
 * use console
 * use printer power on or off
-* connect board usb to pc "blue usb" -- "black usb" will fail
+* connect board usb to dell usb-row-2 or 3 -- usb-row-1 will fail
 
 * invoke arkon.sh -- makes symlink, verifies config, verifies build
 * notice output: "version: {commit}"
