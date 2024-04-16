@@ -21,7 +21,7 @@ no reset symptom:
 
 * use work3
 * use console
-* use printer power off
+* use printer power on or off
 * connect board usb to pc "blue usb" -- "black usb" will fail
 
 * invoke arkon.sh -- makes symlink, verifies config, verifies build
