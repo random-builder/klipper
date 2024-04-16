@@ -25,7 +25,7 @@ ssh $make_host "rm -rf $klipper_data/service.log"
 ssh $make_host "sudo systemctl start  $klipper_unit"
 
 echo "### retreive printer status"
-sleep 1
+sleep 1.5
 scp $make_host:$klipper_data/service.log $this_dir/printer.log
 cat $this_dir/printer.log | grep "Loaded MCU"
 
