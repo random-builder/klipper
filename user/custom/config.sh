@@ -21,6 +21,7 @@ ssh $make_host "sudo systemctl stop $klipper_unit"
 
 echo "### repo update"
 ssh $make_host "cd $klipper_repo; git reset --hard"
+ssh $make_host "cd $klipper_repo; git clean -f -d"
 ssh $make_host "cd $klipper_repo; git pull"
 
 echo "### build clean"
