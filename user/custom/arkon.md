@@ -20,19 +20,18 @@ no reset symptom:
 ### work flow
 
 * use work3
-* use console
 * use printer power on or off
-* connect board usb to dell usb-row-2 or 3 -- usb-row-1 will fail
+* connect board usb to dell usb-row 2 or 3 -- usb-row 1 will fail
 
-* invoke arkon.sh -- makes symlink, verifies config, verifies build
+* invoke arkon.py -- makes symlink, verifies config, verifies build
 * notice output: "version: {commit}"
 
-* invoke config.sh -- publish config, makes remote build and flash
+* invoke config.py -- publish config, makes remote build and flash
 * notice output: "version: {commit}"
  
 * re-connect lpc176x to "blue usb" -- ensure board reset after flash
 
-* invoke printer.sh -- publish printer, makes remote service restart 
+* invoke printer.py -- publish printer, makes remote service restart 
 * notice output: "Loaded MCU ... commands ( {commit} ... )"
 
 * make octopring reconnect http://make1:5001
