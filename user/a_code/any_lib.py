@@ -6,6 +6,7 @@ import enum
 import os
 import time
 import tkinter
+from contextlib import suppress
 from dataclasses import dataclass
 from tkinter import Label, simpledialog, ttk
 
@@ -201,7 +202,7 @@ class KlipperBean:
 
     def remote_build_flash(self) -> None:
         print_report("remote_build_flash")
-        invoke_ssh_exec(f"cd {self.klipper_repo} ; make flash KCONFIG_CONFIG={self.target_config} FLASH_DEVICE={self.flash_device_id}")
+        invoke_ssh_exec(f"cd {self.klipper_repo} ; make flash KCONFIG_CONFIG={self.target_config} FLASH_DEVICE={self.flash_device_path}")
 
     def perform_local_config_verify(self) -> None:
         self.local_build_clean()
@@ -248,8 +249,10 @@ class KlipperBean:
             case WorkType.Work_Printer:
                 self.perform_remote_printer_update()
             case WorkType.Work_Totalitar:
-                self.perform_remote_build_update()
-                self.perform_remote_printer_update()
+                with suppress(Exception):
+                    self.perform_remote_build_update()
+                with suppress(Exception):
+                    self.perform_remote_printer_update()
             case _:
                 pass
 
