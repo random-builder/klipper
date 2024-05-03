@@ -1,4 +1,8 @@
 
+### folder
+
+this is dedicated printer folder
+
 ### board
 
 using custom lpc176x

@@ -7,6 +7,7 @@
 from anylib import *  # @UnusedWildImport
 
 klipper_bean.perform_local_config_verify()
+
 #
 #
 #
