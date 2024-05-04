@@ -35,9 +35,13 @@ skr_bean = KlipperBean(
     flash_device_id="usb-Klipper_lpc1768_0D50FF1502942EAF8D89515BC62000F5-if00",
 )
 
-# skr_bean.perform_test_work()
+# skr_bean.perform_test_work(work_type=WorkType.Local_Verify)
+# skr_bean.perform_test_work(work_type=WorkType.Local_Firmware)
+
 # octopus_bean.perform_test_work()
-spider_bean.perform_test_work()
+
+spider_bean.perform_test_work(work_type=WorkType.Local_Firmware)
+# spider_bean.perform_test_work(work_type=WorkType.Local_Printer)
 
 #
 #

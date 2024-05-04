@@ -9,6 +9,7 @@ import tkinter
 from contextlib import suppress
 from dataclasses import dataclass
 from tkinter import Label, simpledialog, ttk
+from typing import Optional
 
 make_host = "make_print@make1"
 
@@ -304,14 +305,15 @@ class KlipperBean:
             case _:
                 pass
 
-    def perform_test_work(self) -> None:
+    def perform_test_work(self, work_type:Optional[WorkType]=None) -> None:
         print_report("perform_test_work")
         option_list = [
             WorkType.Local_Verify,
             WorkType.Local_Firmware,
             WorkType.Local_Printer,
         ]
-        work_type = self.select_work_type(option_list)
+        if work_type is None:
+            work_type = self.select_work_type(option_list)
         match work_type:
             case WorkType.Local_Verify:
                 self.perform_local_build_verify()
