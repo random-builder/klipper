@@ -26,6 +26,14 @@ def invoke_ssh_copy(source:str, target:str) -> None:
     assert os.system(f"scp '{source}' '{target}'") == 0
 
 
+def print_report(message:str) -> None:
+    print(f"### {message} ###".upper())
+
+
+def invoke_plain(command:str) -> None:
+    assert os.system(command) == 0
+
+
 # override by Dialog._place_window()
 def center_window(window, window_width, window_height, offset_x=0, offset_y=0):
     window.wm_attributes('-alpha', 0)  # hide window
@@ -83,18 +91,22 @@ class SelectDialog(simpledialog.Dialog):
 
 
 class WorkType(enum.Enum):
-    Work_Verify = "Verify Build"
-    Work_Firmware = "Update Firmware"
-    Work_Printer = "Update Printer Config"
-    Work_Totalitar = "Update Firmware & Printer"
+
+    Local_Verify = "Local build: Verify"
+    Local_Firmware = "Local update:Firmware"
+    Local_Printer = "Local update: Printer Config"
+
+    Remote_Firmware = "Remote update:Firmware"
+    Remote_Printer = "Remote update: Printer Config"
+    Remote_Total_Setup = "Remote update: Firmware & Printer"
 
     @classmethod
     def from_value_text(self, value:str) -> "WorkType":
         return WorkType(value)
 
     @classmethod
-    def make_value_list(self) -> list[str]:
-        return list(map(lambda x: x.value, WorkType))
+    def make_value_list(self, work_type_list:list["WorkType"]) -> list[str]:
+        return list(map(lambda x: x.value, work_type_list))
 
 
 @dataclass
@@ -218,12 +230,12 @@ class KlipperBean:
         self.run_local_build_config()
         self.run_local_build_make()
 
-    def perform_local_build_update(self) -> None:
+    def perform_local_firmware_update(self) -> None:
         self.run_local_build_clean()
         self.run_local_build_make()
         self.run_local_build_flash()
 
-    def perform_local_printer_update(self) -> None:
+    def perform_local_printer_verify(self) -> None:
         printer_cfg = self.source_printer_cfg
         logger_file = f"{self.profile_dir}/printer-verify.log"
         socket_file = f"{self.profile_dir}/printer-verify.tty"
@@ -236,7 +248,7 @@ class KlipperBean:
         "
         invoke_plain(klipper_command)
 
-    def perform_remote_build_update(self) -> None:
+    def perform_remote_firmware_update(self) -> None:
         self.remote_unit_stop()
         self.remote_repo_update()
         self.run_remote_build_clean()
@@ -256,11 +268,12 @@ class KlipperBean:
         invoke_ssh_copy(f"{make_host}:{self.target_service_log}", f"{self.source_service_log}")
         invoke_plain(f"cat {self.source_service_log} | grep 'Loaded MCU'")
 
-    def select_work_type(self) -> WorkType:
+    def select_work_type(self, work_type_list:list[WorkType]) -> WorkType:
+        option_list = WorkType.make_value_list(work_type_list)
         select_dialog = SelectDialog(
             title=self.profile_name,
             request="Select Work Type",
-            option_list=WorkType.make_value_list(),
+            option_list=option_list,
         )
         select_value = select_dialog.response
         work_type = WorkType.from_value_text(select_value)
@@ -268,17 +281,23 @@ class KlipperBean:
 
     def perform_main_work(self) -> None:
         print_report("perform_main_work")
-        work_type = self.select_work_type()
+        option_list = [
+            WorkType.Local_Verify,
+            WorkType.Remote_Firmware,
+            WorkType.Remote_Printer,
+            WorkType.Remote_Total_Setup
+        ]
+        work_type = self.select_work_type(option_list)
         match work_type:
-            case WorkType.Work_Verify:
+            case WorkType.Local_Verify:
                 self.perform_local_build_verify()
-            case WorkType.Work_Firmware:
-                self.perform_remote_build_update()
-            case WorkType.Work_Printer:
+            case WorkType.Remote_Firmware:
+                self.perform_remote_firmware_update()
+            case WorkType.Remote_Printer:
                 self.perform_remote_printer_update()
-            case WorkType.Work_Totalitar:
+            case WorkType.Remote_Total_Setup:
                 with suppress(Exception):
-                    self.perform_remote_build_update()
+                    self.perform_remote_firmware_update()
                 with suppress(Exception):
                     self.perform_remote_printer_update()
             case _:
@@ -286,26 +305,21 @@ class KlipperBean:
 
     def perform_test_work(self) -> None:
         print_report("perform_test_work")
-        work_type = self.select_work_type()
+        option_list = [
+            WorkType.Local_Verify,
+            WorkType.Local_Firmware,
+            WorkType.Local_Printer,
+        ]
+        work_type = self.select_work_type(option_list)
         match work_type:
-            case WorkType.Work_Verify:
+            case WorkType.Local_Verify:
                 self.perform_local_build_verify()
-            case WorkType.Work_Firmware:
-                self.perform_local_build_update()
-            case WorkType.Work_Printer:
-                self.perform_local_printer_update()
-            case WorkType.Work_Totalitar:
-                pass
+            case WorkType.Local_Firmware:
+                self.perform_local_firmware_update()
+            case WorkType.Local_Printer:
+                self.perform_local_printer_verify()
             case _:
                 pass
-
-
-def print_report(message:str) -> None:
-    print(f"### {message} ###".upper())
-
-
-def invoke_plain(command:str) -> None:
-    assert os.system(command) == 0
 
 #
 #
