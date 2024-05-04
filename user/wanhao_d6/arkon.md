@@ -16,10 +16,3 @@ critical:
 * reason: provide stable usb klipper connection  	 
 * reason: eliminate usb bus reset during nut power switch
 * side effect: needs manual board reset after firmware flash
-
-no reset symptom:
-* bad reset: solo green led is on
-* good reset: every green led is on 
-
-reset solution:
-* after firmware flash: re-connect usb cable
