@@ -240,6 +240,7 @@ class KlipperBean:
         logger_file = f"{self.profile_dir}/printer-verify.log"
         socket_file = f"{self.profile_dir}/printer-verify.tty"
         repo_root = self.local_repo_root
+        if os.path.exists(logger_file): os.remove(logger_file)
         klipper_command = f"\
             /usr/bin/python \
             {repo_root}/klippy/klippy.py {printer_cfg} \

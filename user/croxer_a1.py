@@ -35,9 +35,9 @@ skr_bean = KlipperBean(
     flash_device_id="usb-Klipper_lpc1768_0D50FF1502942EAF8D89515BC62000F5-if00",
 )
 
-# spider_bean.perform_test_work()
+# skr_bean.perform_test_work()
 # octopus_bean.perform_test_work()
-skr_bean.perform_test_work()
+spider_bean.perform_test_work()
 
 #
 #
