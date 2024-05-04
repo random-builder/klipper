@@ -83,10 +83,10 @@ class SelectDialog(simpledialog.Dialog):
 
 
 class WorkType(enum.Enum):
-    Work_Verify = "Verify Local Build"
-    Work_Firmware = "Update Remote Firmware"
-    Work_Printer = "Update Remote Printer Config"
-    Work_Totalitar = "Update Remote Firmware & Printer"
+    Work_Verify = "Verify Build"
+    Work_Firmware = "Update Firmware"
+    Work_Printer = "Update Printer Config"
+    Work_Totalitar = "Update Firmware & Printer"
 
     @classmethod
     def from_value_text(self, value:str) -> "WorkType":
@@ -104,6 +104,10 @@ class KlipperBean:
     profile_name:str
     flash_device_id:str
 
+    firmware_file:str = "firmware.cfg"
+    printer_file:str = "printer.cfg"
+    logster_file:str = "service.log"
+
     @property
     def flash_device_path(self) -> str:
         return f"/dev/serial/by-id/{self.flash_device_id}"
@@ -113,109 +117,132 @@ class KlipperBean:
         return os.popen("git rev-parse --show-toplevel").readline().strip()
 
     @property
-    def klipper_unit(self) -> str:
+    def klipper_service_unit(self) -> str:
         return f"make_klipper-{self.profile_name}.service"
 
     @property
-    def klipper_data(self) -> str:
+    def klipper_data_dir(self) -> str:
         return f"/home/make_print/{self.profile_name}/klip/data"
 
     @property
-    def klipper_repo(self) -> str:
+    def klipper_repo_dir(self) -> str:
         return f"/home/make_print/{self.profile_name}/klip/repo"
 
     @property
-    def source_config(self) -> str:
-        return f"{self.profile_dir}/firmware.cfg"
+    def source_firmware_cfg(self) -> str:
+        return f"{self.profile_dir}/{self.firmware_file}"
 
     @property
-    def target_config(self) -> str:
-        return f"{self.klipper_repo}/user/{self.profile_name}/firmware.cfg"
+    def target_firmware_cfg(self) -> str:
+        return f"{self.klipper_repo_dir}/user/{self.profile_name}/{self.firmware_file}"
 
     @property
-    def source_printer(self) -> str:
-        return  f"{self.profile_dir}/printer.cfg"
+    def source_printer_cfg(self) -> str:
+        return  f"{self.profile_dir}/{self.printer_file}"
 
     @property
-    def target_printer(self) -> str:
-        return f"{self.klipper_repo}/user/{self.profile_name}/printer.cfg"
+    def target_printer_cfg(self) -> str:
+        return f"{self.klipper_repo_dir}/user/{self.profile_name}/{self.printer_file}"
 
     @property
     def source_service_log(self) -> str:
-        return f"{self.profile_dir}/service.log"
+        return f"{self.profile_dir}/{self.logster_file}"
 
     @property
     def target_service_log(self) -> str:
-        return f"{self.klipper_data}/service.log"
+        return f"{self.klipper_data_dir}/{self.logster_file}"
 
-    def local_build_clean(self) -> None:
-        print_report("local_build_clean")
+    def run_local_build_clean(self) -> None:
+        print_report("run_local_build_clean")
         os.chdir(self.local_repo_root)
-        invoke_plain(f"make KCONFIG_CONFIG={self.source_config} distclean")
+        invoke_plain(f"make KCONFIG_CONFIG={self.source_firmware_cfg} distclean")
 
-    def local_build_config(self) -> None:
-        print_report("local_build_config")
+    def run_local_build_config(self) -> None:
+        print_report("run_local_build_config")
         os.chdir(self.local_repo_root)
-        invoke_xterm(f"make KCONFIG_CONFIG={self.source_config} menuconfig")
+        invoke_xterm(f"make KCONFIG_CONFIG={self.source_firmware_cfg} menuconfig")
 
-    def local_build_make(self) -> None:
-        print_report("local_build_make")
+    def run_local_build_make(self) -> None:
+        print_report("run_local_build_make")
         os.chdir(self.local_repo_root)
-        invoke_plain(f"make KCONFIG_CONFIG={self.source_config}")
+        invoke_plain(f"make KCONFIG_CONFIG={self.source_firmware_cfg}")
+
+    def run_local_build_flash(self) -> None:
+        print_report("run_local_build_flash")
+        os.chdir(self.local_repo_root)
+        invoke_plain(f"make flash KCONFIG_CONFIG={self.source_firmware_cfg} FLASH_DEVICE={self.flash_device_path}")
 
     def remote_unit_restart(self) -> None:
         print_report("remote_unit_restart")
-        invoke_ssh_exec(f"sudo systemctl stop {self.klipper_unit}")
+        invoke_ssh_exec(f"sudo systemctl stop {self.klipper_service_unit}")
         invoke_ssh_exec(f"rm -rf {self.target_service_log}")
-        invoke_ssh_exec(f"sudo systemctl start {self.klipper_unit}")
+        invoke_ssh_exec(f"sudo systemctl start {self.klipper_service_unit}")
 
     def remote_unit_start(self) -> None:
         print_report("remote_unit_start")
-        invoke_ssh_exec(f"sudo systemctl start {self.klipper_unit}")
+        invoke_ssh_exec(f"sudo systemctl start {self.klipper_service_unit}")
 
     def remote_unit_stop(self) -> None:
         print_report("remote_unit_stop")
-        invoke_ssh_exec(f"sudo systemctl stop {self.klipper_unit}")
+        invoke_ssh_exec(f"sudo systemctl stop {self.klipper_service_unit}")
 
     def remote_repo_update(self) -> None:
         print_report("remote_repo_update")
-        invoke_ssh_exec(f"cd {self.klipper_repo} ; git reset --hard")
-        invoke_ssh_exec(f"cd {self.klipper_repo} ; git clean -f -d")
-        invoke_ssh_exec(f"cd {self.klipper_repo} ; git pull")
+        invoke_ssh_exec(f"cd {self.klipper_repo_dir} ; git reset --hard")
+        invoke_ssh_exec(f"cd {self.klipper_repo_dir} ; git clean -f -d")
+        invoke_ssh_exec(f"cd {self.klipper_repo_dir} ; git pull")
 
-    def remote_build_clean(self) -> None:
-        print_report("remote_build_clean")
-        invoke_ssh_exec(f"cd {self.klipper_repo} ; make KCONFIG_CONFIG={self.target_config} distclean")
+    def run_remote_build_clean(self) -> None:
+        print_report("run_remote_build_clean")
+        invoke_ssh_exec(f"cd {self.klipper_repo_dir} ; make KCONFIG_CONFIG={self.target_firmware_cfg} distclean")
 
     def publish_build_config(self) -> None:
         print_report("publish publish_build_config")
-        invoke_ssh_copy(f"{self.source_config}", f"{make_host}:{self.target_config}")
+        invoke_ssh_copy(f"{self.source_firmware_cfg}", f"{make_host}:{self.target_firmware_cfg}")
 
     def publish_printer_config(self) -> None:
         print_report("publish_printer_config")
-        invoke_ssh_exec(f"dirname {self.target_printer} | xargs mkdir -p")
-        invoke_ssh_copy(f"{self.source_printer}", f"{make_host}:{self.target_printer}")
+        invoke_ssh_exec(f"dirname {self.target_printer_cfg} | xargs mkdir -p")
+        invoke_ssh_copy(f"{self.source_printer_cfg}", f"{make_host}:{self.target_printer_cfg}")
 
-    def remote_build_make(self) -> None:
-        print_report("remote_build_make")
-        invoke_ssh_exec(f"cd {self.klipper_repo} ; make KCONFIG_CONFIG={self.target_config}")
+    def run_remote_build_make(self) -> None:
+        print_report("run_remote_build_make")
+        invoke_ssh_exec(f"cd {self.klipper_repo_dir} ; make KCONFIG_CONFIG={self.target_firmware_cfg}")
 
-    def remote_build_flash(self) -> None:
-        print_report("remote_build_flash")
-        invoke_ssh_exec(f"cd {self.klipper_repo} ; make flash KCONFIG_CONFIG={self.target_config} FLASH_DEVICE={self.flash_device_path}")
+    def run_remote_build_flash(self) -> None:
+        print_report("run_remote_build_flash")
+        invoke_ssh_exec(f"cd {self.klipper_repo_dir} ; make flash KCONFIG_CONFIG={self.target_firmware_cfg} FLASH_DEVICE={self.flash_device_path}")
 
-    def perform_local_config_verify(self) -> None:
-        self.local_build_clean()
-        self.local_build_config()
-        self.local_build_make()
+    def perform_local_build_verify(self) -> None:
+        self.run_local_build_clean()
+        self.run_local_build_config()
+        self.run_local_build_make()
+
+    def perform_local_build_update(self) -> None:
+        self.run_local_build_clean()
+        self.run_local_build_make()
+        self.run_local_build_flash()
+
+    def perform_local_printer_update(self) -> None:
+        printer_cfg = self.source_printer_cfg
+        logger_file = f"{self.profile_dir}/printer-verify.log"
+        socket_file = f"{self.profile_dir}/printer-verify.tty"
+        repo_root = self.local_repo_root
+        klipper_command = f"\
+            /usr/bin/python \
+            {repo_root}/klippy/klippy.py {printer_cfg} \
+            --logfile    {logger_file} \
+            --input-tty  {socket_file} \
+        "
+        invoke_plain(klipper_command)
 
     def perform_remote_build_update(self) -> None:
         self.remote_unit_stop()
         self.remote_repo_update()
-        self.remote_build_clean()
+        self.run_remote_build_clean()
         self.publish_build_config()
-        self.remote_build_make()
-        self.remote_build_flash()
+        self.run_remote_build_make()
+        self.run_remote_build_flash()
         self.remote_unit_start()
 
     def perform_remote_printer_update(self) -> None:
@@ -229,21 +256,22 @@ class KlipperBean:
         invoke_ssh_copy(f"{make_host}:{self.target_service_log}", f"{self.source_service_log}")
         invoke_plain(f"cat {self.source_service_log} | grep 'Loaded MCU'")
 
-    def perform_build_work(self) -> None:
-        print_report("perform_build_work")
-
+    def select_work_type(self) -> WorkType:
         select_dialog = SelectDialog(
             title=self.profile_name,
             request="Select Work Type",
             option_list=WorkType.make_value_list(),
         )
-
         select_value = select_dialog.response
         work_type = WorkType.from_value_text(select_value)
+        return work_type
 
+    def perform_main_work(self) -> None:
+        print_report("perform_main_work")
+        work_type = self.select_work_type()
         match work_type:
             case WorkType.Work_Verify:
-                self.perform_local_config_verify()
+                self.perform_local_build_verify()
             case WorkType.Work_Firmware:
                 self.perform_remote_build_update()
             case WorkType.Work_Printer:
@@ -253,6 +281,21 @@ class KlipperBean:
                     self.perform_remote_build_update()
                 with suppress(Exception):
                     self.perform_remote_printer_update()
+            case _:
+                pass
+
+    def perform_test_work(self) -> None:
+        print_report("perform_test_work")
+        work_type = self.select_work_type()
+        match work_type:
+            case WorkType.Work_Verify:
+                self.perform_local_build_verify()
+            case WorkType.Work_Firmware:
+                self.perform_local_build_update()
+            case WorkType.Work_Printer:
+                self.perform_local_printer_update()
+            case WorkType.Work_Totalitar:
+                pass
             case _:
                 pass
 

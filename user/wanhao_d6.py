@@ -13,7 +13,7 @@ klipper_bean = KlipperBean(
     flash_device_id="usb-Klipper_lpc1768_16100006262006AF566E6E58C32000F5-if00",
 )
 
-klipper_bean.perform_build_work()
+klipper_bean.perform_main_work()
 
 #
 #
