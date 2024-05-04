@@ -36,10 +36,14 @@ skr_bean = KlipperBean(
 )
 
 # skr_bean.perform_test_work(work_type=WorkType.Local_Verify)
-# skr_bean.perform_test_work(work_type=WorkType.Local_Firmware)
+skr_bean.perform_test_work(work_type=WorkType.Local_Firmware)
+# skr_bean.perform_test_work(work_type=WorkType.Local_Printer)
 
-# octopus_bean.perform_test_work()
+# octopus_bean.perform_test_work(work_type=WorkType.Local_Verify)
+octopus_bean.perform_test_work(work_type=WorkType.Local_Firmware)
+# octopus_bean.perform_test_work(work_type=WorkType.Local_Printer)
 
+# spider_bean.perform_test_work(work_type=WorkType.Local_Verify)
 spider_bean.perform_test_work(work_type=WorkType.Local_Firmware)
 # spider_bean.perform_test_work(work_type=WorkType.Local_Printer)
 
