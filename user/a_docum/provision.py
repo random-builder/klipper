@@ -5,7 +5,7 @@ import os
 # NOTE: remember to freeze
 # /etc/pacman.conf
 # [options]
-# IgnorePkg = arm-none-eabi-newlib,dfu-util
+# IgnorePkg = arm-none-eabi-newlib dfu-util
 
 
 #
