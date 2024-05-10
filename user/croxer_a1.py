@@ -9,6 +9,7 @@ profile_name = os.path.basename(__file__).replace(".py", "")
 
 # https://docs.vorondesign.com/build/software/spider_klipper.html
 spider_bean = KlipperBean(
+    remote_host="make2",
     profile_dir=profile_dir,
     profile_name=profile_name,
     firmware_file="firmware-spider-v-2.2.cfg",
@@ -18,6 +19,7 @@ spider_bean = KlipperBean(
 
 # https://docs.vorondesign.com/build/software/octopus_klipper.html
 octopus_bean = KlipperBean(
+    remote_host="make2",
     profile_dir=profile_dir,
     profile_name=profile_name,
     firmware_file="firmware-octopus-v-1.1.cfg",
@@ -28,6 +30,7 @@ octopus_bean = KlipperBean(
 # note:
 # * need to use usb-2.0 @ work3
 skr_bean = KlipperBean(
+    remote_host="make2",
     profile_dir=profile_dir,
     profile_name=profile_name,
     firmware_file="firmware-skr-v-1.3.cfg",
@@ -36,16 +39,26 @@ skr_bean = KlipperBean(
 )
 
 # skr_bean.perform_test_work(work_type=WorkType.Local_Verify)
-skr_bean.perform_test_work(work_type=WorkType.Local_Firmware)
+# skr_bean.perform_test_work(work_type=WorkType.Local_Firmware)
 # skr_bean.perform_test_work(work_type=WorkType.Local_Printer)
 
 # octopus_bean.perform_test_work(work_type=WorkType.Local_Verify)
-octopus_bean.perform_test_work(work_type=WorkType.Local_Firmware)
+# octopus_bean.perform_test_work(work_type=WorkType.Local_Firmware)
 # octopus_bean.perform_test_work(work_type=WorkType.Local_Printer)
 
 # spider_bean.perform_test_work(work_type=WorkType.Local_Verify)
-spider_bean.perform_test_work(work_type=WorkType.Local_Firmware)
+# spider_bean.perform_test_work(work_type=WorkType.Local_Firmware)
 # spider_bean.perform_test_work(work_type=WorkType.Local_Printer)
+
+#
+#
+#
+
+# skr_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
+
+# octopus_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
+
+spider_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
 
 #
 #
