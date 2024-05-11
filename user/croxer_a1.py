@@ -54,9 +54,9 @@ skr_bean = KlipperBean(
 #
 #
 
-# skr_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
+skr_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
 
-# octopus_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
+octopus_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
 
 spider_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
 
