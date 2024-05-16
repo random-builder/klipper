@@ -1,0 +1,10 @@
+{
+'speed_factor': 1.0, 
+'speed': 1500.0, 
+'extrude_factor': 1.0, 
+'absolute_coordinates': True, 
+'absolute_extrude': True, 
+'homing_origin': Coord(x=0.0, y=0.0, z=0.0, e=0.0), 
+'position': Coord(x=0.0, y=0.0, z=0.0, e=0.0), 
+'gcode_position': Coord(x=0.0, y=0.0, z=0.0, e=0.0)
+}
