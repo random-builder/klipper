@@ -14,8 +14,9 @@ klipper_bean = KlipperBean(
     flash_device_id="usb-Klipper_lpc1768_16100006262006AF566E6E58C32000F5-if00",
 )
 
+klipper_bean.perform_main_work(work_type=WorkType.Local_Verify)
 # klipper_bean.perform_main_work(work_type=WorkType.Remote_Printware)
-klipper_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
+# klipper_bean.perform_main_work(work_type=WorkType.Remote_Total_Update)
 
 #
 #
